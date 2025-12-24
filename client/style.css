@@ -1,0 +1,251 @@
+:root {
+  --bg: #0f1115;
+  --panel: #151922;
+  --text: #e8ecf1;
+  --muted: #a9b2c3;
+
+  --tile: #1b2230;
+  --tile-border: #2a354a;
+
+  --green: #2ea043;
+  --yellow: #d29922;
+  --gray: #4b5563;
+
+  --key: #242c3c;
+  --key-border: #2f3a52;
+
+  --shadow: 0 10px 30px rgba(0, 0, 0, .35);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(1200px 600px at 50% -10%, #1a2340 0%, var(--bg) 55%);
+  color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+}
+
+.app {
+  width: min(520px, 94vw);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, .02));
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 20px;
+  padding: 18px 16px 16px;
+  box-shadow: var(--shadow);
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 4px 10px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 18px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.btn {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, .12);
+  background: rgba(255, 255, 255, .06);
+  color: var(--text);
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform .06s ease, background .15s ease, border-color .15s ease;
+}
+
+.btn:hover {
+  background: rgba(255, 255, 255, .09);
+  border-color: rgba(255, 255, 255, .18);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.status {
+  min-height: 22px;
+  margin: 6px 4px 12px;
+  color: var(--muted);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 6px;
+}
+
+.grid {
+  display: grid;
+  grid-template-rows: repeat(6, 1fr);
+  gap: 8px;
+  padding: 6px 6px 14px;
+  justify-content: center;
+}
+
+.row {
+  display: grid;
+  gap: 8px; /* columns set dynamically from JS */
+}
+
+.tile {
+  width: min(64px, 15vw);
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  background: var(--tile);
+  border: 1px solid var(--tile-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  user-select: none;
+  position: relative;
+}
+
+.tile.filled {
+  border-color: rgba(255, 255, 255, .24);
+}
+
+/* Flip reveal animation (only on submitted row) */
+.tile.reveal {
+  animation: flip .55s ease forwards;
+  transform-style: preserve-3d;
+}
+
+@keyframes flip {
+  0% {
+    transform: rotateX(0deg);
+  }
+
+  45% {
+    transform: rotateX(90deg);
+  }
+
+  55% {
+    transform: rotateX(90deg);
+  }
+
+  100% {
+    transform: rotateX(0deg);
+  }
+}
+
+.tile.correct {
+  background: var(--green);
+  border-color: rgba(0, 0, 0, .15);
+}
+
+.tile.present {
+  background: var(--yellow);
+  border-color: rgba(0, 0, 0, .15);
+}
+
+.tile.absent {
+  background: var(--gray);
+  border-color: rgba(0, 0, 0, .15);
+}
+
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 6px;
+  user-select: none;
+}
+
+.krow {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: nowrap;
+}
+
+.key {
+  min-width: 32px;
+  height: 46px;
+  padding: 0 10px;
+  border-radius: 12px;
+  border: 1px solid var(--key-border);
+  background: var(--key);
+  color: var(--text);
+  font-weight: 800;
+  letter-spacing: .04em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  transition: transform .06s ease, filter .15s ease, background .15s ease, border-color .15s ease;
+}
+
+.key:hover {
+  filter: brightness(1.08);
+}
+
+.key:active {
+  transform: translateY(1px);
+}
+
+.key.wide {
+  min-width: 74px;
+  font-size: 12px;
+  letter-spacing: .08em;
+}
+
+.key.correct {
+  background: var(--green);
+  border-color: rgba(0, 0, 0, .15);
+}
+
+.key.present {
+  background: var(--yellow);
+  border-color: rgba(0, 0, 0, .15);
+}
+
+.key.absent {
+  background: var(--gray);
+  border-color: rgba(0, 0, 0, .15);
+}
+
+.footer {
+  margin-top: 10px;
+  color: rgba(255, 255, 255, .45);
+  font-size: 12px;
+  text-align: center;
+  padding-bottom: 2px;
+}
+
+/* Small screens */
+@media (max-width:420px) {
+  .tile {
+    font-size: 22px;
+    border-radius: 10px;
+  }
+
+  .key {
+    height: 44px;
+    border-radius: 10px;
+  }
+
+  .key.wide {
+    min-width: 64px;
+  }
+}

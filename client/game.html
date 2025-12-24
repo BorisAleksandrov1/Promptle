@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Promptle – Start</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --text: #e8ecf1;
+      --muted: #a9b2c3;
+      --accent: #22c55e;
+      --accent-dark: #15803d;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(1200px 600px at 50% -10%, #1a2340 0%, var(--bg) 55%);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* NAVBAR */
+
+    .nav {
+      width: 100%;
+      max-width: 960px;
+      padding: 10px 18px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(
+        180deg,
+        rgba(15,17,24,.92),
+        rgba(15,17,24,.85),
+        rgba(15,17,24,0)
+      );
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-logo {
+      /* bigger logo */
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.15);
+      background: #020617;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .nav-brand {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .nav-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    .nav-tagline {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      color: var(--muted);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+    }
+
+    .nav-link {
+      position: relative;
+      color: var(--muted);
+      padding-bottom: 3px;
+    }
+
+    .nav-link.active { color: #e5e7eb; }
+
+    .nav-link::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 0;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 999px;
+      transition: width .18s ease;
+    }
+
+    .nav-link:hover::after { width: 100%; }
+
+    .nav-btn {
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.2);
+      background: rgba(15,23,42,.9);
+      color: var(--text);
+      padding: 6px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      transition: background .15s ease, transform .06s ease, border-color .15s ease;
+    }
+
+    .nav-btn:hover {
+      background: rgba(30,41,59,.95);
+      border-color: rgba(255,255,255,.3);
+    }
+
+    .nav-btn:active {
+      transform: translateY(1px);
+    }
+
+    @media (max-width: 600px) {
+      .nav {
+        padding-inline: 12px;
+      }
+      .nav-tagline { display: none; }
+      .nav-links { gap: 10px; }
+    }
+
+    /* MAIN WRAPPER – centers hero vertically */
+
+    .main-shell {
+      width: 100%;
+      max-width: 960px;
+      flex: 1; /* fill remaining height under navbar */
+      display: flex;
+      align-items: center;   /* vertical center */
+      justify-content: center; /* horizontal center */
+      padding: 24px 18px 32px;
+    }
+
+    /* HERO */
+
+    .hero {
+      width: 100%;
+      text-align: center;
+    }
+
+    .hero-logo-large {
+      /* bigger hero logo */
+      width: 120px;
+      height: 120px;
+      border-radius: 26px;
+      margin: 0 auto 20px;
+      background: #020617;
+      border: 1px solid rgba(255,255,255,.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow);
+    }
+
+    .hero-logo-large img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 24px;
+    }
+
+    .hero-title {
+      font-size: 42px;
+      margin: 6px 0 8px;
+      font-weight: 800;
+    }
+
+    .hero-sub {
+      font-size: 20px;
+      margin: 0 0 4px;
+    }
+
+    .hero-sub span {
+      font-weight: 500;
+    }
+
+    .hero-sub2 {
+      font-size: 18px;
+      margin: 0 0 22px;
+      color: var(--muted);
+    }
+
+    .hero-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .btn {
+      border-radius: 999px;
+      padding: 10px 26px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background .15s ease, color .15s ease, transform .06s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+
+    .btn-primary {
+      background: var(--accent-dark);
+      color: #f9fafb;
+      border-color: rgba(34,197,94,.7);
+      box-shadow: 0 10px 24px rgba(22,163,74,.55);
+    }
+
+    .btn-primary:hover {
+      background: #16a34a;
+      transform: translateY(-1px);
+      box-shadow: 0 14px 32px rgba(22,163,74,.6);
+    }
+
+    .btn-primary:active {
+      transform: translateY(1px);
+      box-shadow: 0 6px 18px rgba(22,163,74,.55);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      border-color: rgba(255,255,255,.25);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(15,23,42,.9);
+    }
+
+    /* MODALS */
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 30;
+    }
+
+    .modal-overlay.show { display: flex; }
+
+    .modal {
+      background: #020617;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.1);
+      padding: 18px 18px 16px;
+      width: min(360px, 90vw);
+      box-shadow: 0 24px 40px rgba(0,0,0,.6);
+      opacity: 0;
+      transform: translateY(8px) scale(.96);
+      transition: opacity .15s ease, transform .15s ease;
+    }
+
+    .modal.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 18px;
+      padding: 0 4px;
+    }
+
+    .modal-body {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .modal-body p {
+      margin: 4px 0 8px;
+    }
+
+    .modal-body label {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .modal-body input {
+      width: 100%;
+      padding: 7px 9px;
+      border-radius: 8px;
+      border: 1px solid rgba(148,163,184,.7);
+      background: #020617;
+      color: var(--text);
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .modal-body input:focus {
+      outline: 1px solid var(--accent);
+      border-color: var(--accent);
+    }
+
+    .modal-actions {
+      margin-top: 8px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .btn-small {
+      border-radius: 999px;
+      font-size: 12px;
+      padding: 7px 14px;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(15,23,42,.9);
+      color: var(--text);
+    }
+
+    .btn-small-primary {
+      background: var(--accent-dark);
+      border-color: rgba(34,197,94,.7);
+    }
+
+    .btn-small-primary:hover {
+      background: #16a34a;
+    }
+
+    .rules-list {
+      margin: 6px 0 0;
+      padding-left: 18px;
+    }
+
+    .rules-list li {
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body id="top">
+  <!-- NAVBAR -->
+  <nav class="nav">
+    <div class="nav-left">
+      <div class="nav-logo">
+        <!-- use your transparent promptle logo here -->
+        <img src="./assets/promptle.png" alt="Promptle logo">
+      </div>
+      <div class="nav-brand">
+        <div class="nav-title">PROMPTLE</div>
+        <div class="nav-tagline">ai-assisted word game</div>
+      </div>
+    </div>
+    <div class="nav-links">
+      <a href="#top" class="nav-link active">Home</a>
+      <button class="nav-btn" type="button" id="navLoginBtn">Log in</button>
+    </div>
+  </nav>
+
+  <!-- MAIN (centered vertically) -->
+  <div class="main-shell">
+    <main class="hero">
+      <div class="hero-logo-large">
+        <img src="./assets/promptle.png" alt="Promptle logo">
+      </div>
+      <h1 class="hero-title">Promptle</h1>
+      <p class="hero-sub">Get 6 chances to guess <span>the secret word.</span></p>
+      <p class="hero-sub2">Log in to play with smart AI hints.</p>
+
+      <div class="hero-buttons">
+        <button class="btn btn-ghost" type="button" id="howToBtn">How to play</button>
+        <button class="btn btn-primary" type="button" id="playBtn">Play</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL OVERLAY -->
+  <div class="modal-overlay" id="modalOverlay">
+    <!-- LOGIN MODAL -->
+    <div class="modal" id="loginModal">
+      <div class="modal-header">
+        <div class="modal-title">Sign in to play Promptle</div>
+        <button class="modal-close" type="button" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>You need an account to start a game.</p>
+        <form id="loginForm">
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="you@example.com" required>
+          <label for="password">Password</label>
+          <input id="password" type="password" placeholder="••••••••" required>
+          <div class="modal-actions">
+            <button class="btn-small" type="button" data-close-modal>Cancel</button>
+            <button class="btn-small btn-small-primary" type="submit">Log in / Sign up</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- HOW TO PLAY MODAL -->
+    <div class="modal" id="howToModal">
+      <div class="modal-header">
+        <div class="modal-title">How to play</div>
+        <button class="modal-close" type="button" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Promptle works like Wordle, with a little AI help:</p>
+        <ul class="rules-list">
+          <li>You have 6 tries to guess the secret word.</li>
+          <li>Type a valid word and press <strong>Enter</strong> to submit.</li>
+          <li>Green = correct letter in the right place.</li>
+          <li>Yellow = letter is in the word, wrong place.</li>
+          <li>Gray = letter is not in the word.</li>
+        </ul>
+        <p style="margin-top:8px;">Later, the AI assistant can suggest smarter guesses based on your attempts.</p>
+        <div class="modal-actions">
+          <button class="btn-small btn-small-primary" type="button" data-close-modal>Got it</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let isLoggedIn = false;
+
+    const playBtn = document.getElementById("playBtn");
+    const howToBtn = document.getElementById("howToBtn");
+    const navLoginBtn = document.getElementById("navLoginBtn");
+
+    const overlay = document.getElementById("modalOverlay");
+    const loginModal = document.getElementById("loginModal");
+    const howToModal = document.getElementById("howToModal");
+    const loginForm = document.getElementById("loginForm");
+
+    function openModal(modal) {
+      overlay.classList.add("show");
+      loginModal.classList.remove("show");
+      howToModal.classList.remove("show");
+      modal.classList.add("show");
+    }
+
+    function closeAllModals() {
+      overlay.classList.remove("show");
+      loginModal.classList.remove("show");
+      howToModal.classList.remove("show");
+    }
+
+    playBtn.addEventListener("click", () => {
+      if (!isLoggedIn) {
+        openModal(loginModal);
+      } else {
+        window.location.href = "index.html"; // your game page
+      }
+    });
+
+    navLoginBtn.addEventListener("click", () => {
+      if (isLoggedIn) {
+        isLoggedIn = false;
+        navLoginBtn.textContent = "Log in";
+      } else {
+        openModal(loginModal);
+      }
+    });
+
+    howToBtn.addEventListener("click", () => {
+      openModal(howToModal);
+    });
+
+    document.querySelectorAll("[data-close-modal]").forEach(btn => {
+      btn.addEventListener("click", closeAllModals);
+    });
+
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) {
+        closeAllModals();
+      }
+    });
+
+    loginForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      isLoggedIn = true;
+      navLoginBtn.textContent = "Log out";
+      closeAllModals();
+      // To auto-redirect after login, uncomment:
+      // window.location.href = "index.html";
+    });
+  </script>
+</body>
+</html>

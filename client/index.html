@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Simple Wordle (Vanilla)</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="app" role="application" aria-label="Simple Wordle">
+    <header>
+      <h1>Wordle</h1>
+      <button class="btn" id="newGameBtn" type="button">New Game</button>
+    </header>
+
+    <div class="status" id="status" aria-live="polite"></div>
+
+    <div class="grid" id="grid" aria-label="Guess grid"></div>
+
+    <div class="keyboard" id="keyboard" aria-label="On-screen keyboard"></div>
+
+    <div class="footer">Type letters • Enter to submit • Backspace to delete</div>
+  </div>
+
+  <!-- Your game logic -->
+  <script src="script.js"></script>
+</body>
+
+</html>
