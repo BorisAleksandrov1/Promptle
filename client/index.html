@@ -1,31 +1,104 @@
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Simple Wordle (Vanilla)</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Promptle – Start</title>
+  <link rel="stylesheet" href="/client/index.css" />
 </head>
 
-<body>
-  <div class="app" role="application" aria-label="Simple Wordle">
-    <header>
-      <h1>Wordle</h1>
-      <button class="btn" id="newGameBtn" type="button">New Game</button>
-    </header>
+<body id="top">
+  <!-- NAVBAR -->
+  <nav class="nav">
+    <div class="nav-left">
+      <div class="nav-logo">
+        <img src="./assets/promptle.png" alt="Promptle logo" />
+      </div>
 
-    <div class="status" id="status" aria-live="polite"></div>
+      <div class="nav-brand">
+        <div class="nav-title">PROMPTLE</div>
+        <div class="nav-tagline">ai-assisted word game</div>
+      </div>
+    </div>
 
-    <div class="grid" id="grid" aria-label="Guess grid"></div>
+    <div class="nav-links">
+      <a href="#top" class="nav-link active">Home</a>
+      <button class="nav-btn" type="button" id="navLoginBtn">Log in</button>
+    </div>
+  </nav>
 
-    <div class="keyboard" id="keyboard" aria-label="On-screen keyboard"></div>
+  <!-- MAIN (centered vertically) -->
+  <div class="main-shell">
+    <main class="hero">
+      <div class="hero-logo-large">
+        <img src="./assets/promptle.png" alt="Promptle logo" />
+      </div>
 
-    <div class="footer">Type letters • Enter to submit • Backspace to delete</div>
+      <h1 class="hero-title">Promptle</h1>
+      <p class="hero-sub">Get 6 chances to guess <span>the secret word.</span></p>
+      <p class="hero-sub2">Log in to play with smart AI hints.</p>
+
+      <div class="hero-buttons">
+        <button class="btn btn-ghost" type="button" id="howToBtn">How to play</button>
+        <button class="btn btn-primary" type="button" id="playBtn">Play</button>
+      </div>
+    </main>
   </div>
 
-  <!-- Your game logic -->
-  <script src="script.js"></script>
-</body>
+  <!-- MODAL OVERLAY -->
+  <div class="modal-overlay" id="modalOverlay">
+    <!-- LOGIN MODAL -->
+    <div class="modal" id="loginModal">
+      <div class="modal-header">
+        <div class="modal-title">Sign in to play Promptle</div>
+        <button class="modal-close" type="button" data-close-modal>&times;</button>
+      </div>
 
+      <div class="modal-body">
+        <p>You need an account to start a game.</p>
+
+        <form id="loginForm">
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="you@example.com" required />
+
+          <label for="password">Password</label>
+          <input id="password" type="password" placeholder="••••••••" required />
+
+          <div class="modal-actions">
+            <button class="btn-small" type="button" data-close-modal>Cancel</button>
+            <button class="btn-small btn-small-primary" type="submit">Log in / Sign up</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- HOW TO PLAY MODAL -->
+    <div class="modal" id="howToModal">
+      <div class="modal-header">
+        <div class="modal-title">How to play</div>
+        <button class="modal-close" type="button" data-close-modal>&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p>Promptle works like Wordle, with a little AI help:</p>
+
+        <ul class="rules-list">
+          <li>You have 6 tries to guess the secret word.</li>
+          <li>Type a valid word and press <strong>Enter</strong> to submit.</li>
+          <li>Green = correct letter in the right place.</li>
+          <li>Yellow = letter is in the word, wrong place.</li>
+          <li>Gray = letter is not in the word.</li>
+        </ul>
+
+        <p class="howto-note">Later, the AI assistant can suggest smarter guesses based on your attempts.</p>
+
+        <div class="modal-actions">
+          <button class="btn-small btn-small-primary" type="button" data-close-modal>Got it</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/client/index.js"></script>
+</body>
 </html>
