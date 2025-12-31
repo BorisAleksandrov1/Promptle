@@ -51,12 +51,32 @@ overlay.addEventListener("click", (e) => {
   if (e.target === overlay) closeAllModals();
 });
 
-loginForm.addEventListener("submit", (e) => {
+loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  isLoggedIn = true;
-  navLoginBtn.textContent = "Log out";
-  closeAllModals();
+  
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-  // To auto-redirect after login, uncomment:
-  // window.location.href = "index.html";
+  try {
+    const res = await fetch("https://promptle-6gyj.onrender.com/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (data.ok) {
+      isLoggedIn = true;
+      localStorage.setItem("promptle_user_id", data.user_id);
+      navLoginBtn.textContent = "Log out";
+      closeAllModals();
+      window.location.href = "game.html";
+    } else {
+      alert(data.error || "Login failed");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Failed to connect to server");
+  }
 });

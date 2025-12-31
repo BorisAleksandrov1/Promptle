@@ -223,6 +223,16 @@ function submitGuess() {
 
   updateKeyStates(guess, score);
 
+  // Save used word to DB
+  const userId = localStorage.getItem("promptle_user_id");
+  if (userId) {
+    fetch("https://promptle-6gyj.onrender.com/api/words", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userId, word: guess })
+    }).catch(err => console.error("Failed to save word:", err));
+  }
+
   // Reveal animation for this row only
   updateGrid(state.row);
   renderKeyboard();
