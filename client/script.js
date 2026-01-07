@@ -3,6 +3,12 @@ const gridEl = document.getElementById("grid");
 const kbEl = document.getElementById("keyboard");
 const statusEl = document.getElementById("status");
 const newBtn = document.getElementById("newGameBtn");
+const streakEl = document.getElementById("streak");
+const winScreen = document.getElementById("winScreen");
+const winMessage = document.getElementById("winMessage");
+const continueBtn = document.getElementById("continueBtn");
+
+const API_BASE = "https://promptle-6gyj.onrender.com";
 
 // Global state
 const state = {
@@ -16,7 +22,8 @@ const state = {
   results: [],
   keyStates: {},
   locked: false,
-  messageTimer: null
+  messageTimer: null,
+  streak: 0
 };
 
 // Load words from words.txt
@@ -55,6 +62,7 @@ function initGame() {
   state.col = 0;
   state.locked = false;
   state.keyStates = {};
+  hideWinScreen();
 
   state.guesses = Array.from({ length: state.maxRows }, () =>
     Array(state.wordLen).fill("")
@@ -75,17 +83,87 @@ function pickRandom(arr) {
   return arr[idx].toUpperCase();
 }
 
-function setStatus(msg) {
+function setStatus(msg, persist = false) {
   statusEl.textContent = msg || "";
   if (state.messageTimer) {
     clearTimeout(state.messageTimer);
     state.messageTimer = null;
   }
-  if (msg && msg !== "You win!" && !msg.startsWith("Game over")) {
+  if (msg && !persist && !state.locked) {
     state.messageTimer = setTimeout(() => {
       if (!state.locked) statusEl.textContent = "";
     }, 1600);
   }
+}
+
+function updateStreakDisplay() {
+  if (!streakEl) return;
+  streakEl.textContent = `Streak: ${state.streak}`;
+}
+
+function applyStreakOutcome(outcome) {
+  if (outcome === "win") {
+    state.streak += 1;
+  } else {
+    state.streak = 0;
+  }
+  updateStreakDisplay();
+}
+
+async function loadStreak() {
+  const userId = localStorage.getItem("promptle_user_id");
+  if (!userId) {
+    state.streak = 0;
+    updateStreakDisplay();
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/streak/${userId}`);
+    const data = await res.json();
+    if (data.ok) {
+      state.streak = Number(data.streak) || 0;
+    }
+  } catch (err) {
+    console.error("Failed to load streak:", err);
+  } finally {
+    updateStreakDisplay();
+  }
+}
+
+async function syncStreak(outcome) {
+  const userId = localStorage.getItem("promptle_user_id");
+  applyStreakOutcome(outcome);
+
+  if (!userId) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/streak`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userId, outcome }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      state.streak = Number(data.streak) || 0;
+      updateStreakDisplay();
+    }
+  } catch (err) {
+    console.error("Failed to update streak:", err);
+  }
+}
+
+function showWinScreen() {
+  if (!winScreen) return;
+  winMessage.textContent = "Correct!";
+  winScreen.classList.add("show");
+  winScreen.setAttribute("aria-hidden", "false");
+}
+
+function hideWinScreen() {
+  if (!winScreen) return;
+  winScreen.classList.remove("show");
+  winScreen.setAttribute("aria-hidden", "true");
 }
 
 // Build the grid structure once (rows + tiles)
@@ -226,7 +304,7 @@ function submitGuess() {
   // Save used word to DB
   const userId = localStorage.getItem("promptle_user_id");
   if (userId) {
-    fetch("https://promptle-6gyj.onrender.com/api/words", {
+    fetch(`${API_BASE}/api/words`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ user_id: userId, word: guess })
@@ -239,13 +317,16 @@ function submitGuess() {
 
   if (guess === state.secret) {
     state.locked = true;
-    setStatus("You win!");
+    setStatus("Correct!", true);
+    showWinScreen();
+    syncStreak("win");
     return;
   }
 
   if (state.row === state.maxRows - 1) {
     state.locked = true;
-    setStatus(`Game over. Word was ${state.secret}.`);
+    setStatus(`Game over. Word was ${state.secret}.`, true);
+    syncStreak("lose");
     return;
   }
 
@@ -313,9 +394,11 @@ document.addEventListener("keydown", (e) => {
 });
 
 newBtn.addEventListener("click", resetGame);
+continueBtn.addEventListener("click", resetGame);
 
 // Start first game after loading words
 window.addEventListener("load", async () => {
   await loadWordList();
+  await loadStreak();
   initGame();
 });

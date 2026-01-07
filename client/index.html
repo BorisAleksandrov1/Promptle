@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Promptle – Start</title>
+  <title>Promptle Start</title>
   <link rel="stylesheet" href="index.css" />
 </head>
 
@@ -50,23 +50,31 @@
     <!-- LOGIN MODAL -->
     <div class="modal" id="loginModal">
       <div class="modal-header">
-        <div class="modal-title">Sign in to play Promptle</div>
+        <div class="modal-title" id="authTitle">Log in to play Promptle</div>
         <button class="modal-close" type="button" data-close-modal>&times;</button>
       </div>
 
       <div class="modal-body">
-        <p>You need an account to start a game.</p>
+        <p id="authPrompt">Use your account to start a game.</p>
+
+        <div class="auth-toggle" role="tablist" aria-label="Authentication mode">
+          <button class="auth-tab active" type="button" data-auth-mode="login">Log in</button>
+          <button class="auth-tab" type="button" data-auth-mode="register">Sign up</button>
+        </div>
 
         <form id="loginForm">
           <label for="email">Email</label>
           <input id="email" type="email" placeholder="you@example.com" required />
 
           <label for="password">Password</label>
-          <input id="password" type="password" placeholder="••••••••" required />
+          <input id="password" type="password" placeholder="********" required />
+          <div class="password-rules hidden" id="passwordRules">
+            Password must be 8-72 chars with at least one letter and one number.
+          </div>
 
           <div class="modal-actions">
             <button class="btn-small" type="button" data-close-modal>Cancel</button>
-            <button class="btn-small btn-small-primary" type="submit">Log in / Sign up</button>
+            <button class="btn-small btn-small-primary" type="submit" id="authSubmitBtn">Log in</button>
           </div>
         </form>
       </div>
