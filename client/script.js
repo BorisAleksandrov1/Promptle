@@ -9,6 +9,7 @@ const winMessage = document.getElementById("winMessage");
 const continueBtn = document.getElementById("continueBtn");
 
 const API_BASE = "https://promptle-6gyj.onrender.com";
+const CURRENT_STREAK_KEY = "promptle_current_streak";
 
 // Global state
 const state = {
@@ -23,7 +24,8 @@ const state = {
   keyStates: {},
   locked: false,
   messageTimer: null,
-  streak: 0
+  currentStreak: 0,
+  bestStreak: 0
 };
 
 // Load words from words.txt
@@ -98,22 +100,31 @@ function setStatus(msg, persist = false) {
 
 function updateStreakDisplay() {
   if (!streakEl) return;
-  streakEl.textContent = `Streak: ${state.streak}`;
+  streakEl.textContent = `Streak: ${state.currentStreak} | Best: ${state.bestStreak}`;
 }
 
-function applyStreakOutcome(outcome) {
-  if (outcome === "win") {
-    state.streak += 1;
-  } else {
-    state.streak = 0;
-  }
-  updateStreakDisplay();
+function getCurrentStreakKey(userId) {
+  return userId ? `${CURRENT_STREAK_KEY}_${userId}` : CURRENT_STREAK_KEY;
+}
+
+function loadCurrentStreak(userId) {
+  const key = getCurrentStreakKey(userId);
+  const raw = localStorage.getItem(key);
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : 0;
+}
+
+function saveCurrentStreak(userId, value) {
+  const key = getCurrentStreakKey(userId);
+  localStorage.setItem(key, String(value));
 }
 
 async function loadStreak() {
   const userId = localStorage.getItem("promptle_user_id");
+  state.currentStreak = loadCurrentStreak(userId);
+  state.bestStreak = 0;
+
   if (!userId) {
-    state.streak = 0;
     updateStreakDisplay();
     return;
   }
@@ -122,7 +133,11 @@ async function loadStreak() {
     const res = await fetch(`${API_BASE}/api/streak/${userId}`);
     const data = await res.json();
     if (data.ok) {
-      state.streak = Number(data.streak) || 0;
+      state.bestStreak = Number(data.best_streak) || 0;
+      if (state.currentStreak > state.bestStreak) {
+        state.bestStreak = state.currentStreak;
+        await syncBestStreak(state.bestStreak);
+      }
     }
   } catch (err) {
     console.error("Failed to load streak:", err);
@@ -131,26 +146,46 @@ async function loadStreak() {
   }
 }
 
-async function syncStreak(outcome) {
+async function syncBestStreak(bestStreak) {
   const userId = localStorage.getItem("promptle_user_id");
-  applyStreakOutcome(outcome);
-
   if (!userId) return;
 
   try {
     const res = await fetch(`${API_BASE}/api/streak`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: userId, outcome }),
+      body: JSON.stringify({ user_id: userId, best_streak: bestStreak }),
     });
     const data = await res.json();
     if (data.ok) {
-      state.streak = Number(data.streak) || 0;
+      state.bestStreak = Number(data.best_streak) || state.bestStreak;
       updateStreakDisplay();
     }
   } catch (err) {
-    console.error("Failed to update streak:", err);
+    console.error("Failed to update best streak:", err);
   }
+}
+
+function handleWinStreak() {
+  const userId = localStorage.getItem("promptle_user_id");
+  state.currentStreak += 1;
+  saveCurrentStreak(userId, state.currentStreak);
+
+  if (state.currentStreak > state.bestStreak) {
+    state.bestStreak = state.currentStreak;
+    updateStreakDisplay();
+    syncBestStreak(state.bestStreak);
+    return;
+  }
+
+  updateStreakDisplay();
+}
+
+function handleLossStreak() {
+  const userId = localStorage.getItem("promptle_user_id");
+  state.currentStreak = 0;
+  saveCurrentStreak(userId, state.currentStreak);
+  updateStreakDisplay();
 }
 
 function showWinScreen() {
@@ -319,14 +354,14 @@ function submitGuess() {
     state.locked = true;
     setStatus("Correct!", true);
     showWinScreen();
-    syncStreak("win");
+    handleWinStreak();
     return;
   }
 
   if (state.row === state.maxRows - 1) {
     state.locked = true;
     setStatus(`Game over. Word was ${state.secret}.`, true);
-    syncStreak("lose");
+    handleLossStreak();
     return;
   }
 

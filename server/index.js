@@ -137,7 +137,7 @@ app.get("/api/streak/:userId", async (req, res) => {
       return res.status(404).json({ ok: false, error: "User not found" });
     }
 
-    return res.json({ ok: true, streak: result.rows[0].streak });
+    return res.json({ ok: true, best_streak: result.rows[0].streak });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ ok: false, error: "Server error" });
@@ -146,26 +146,22 @@ app.get("/api/streak/:userId", async (req, res) => {
 
 app.post("/api/streak", async (req, res) => {
   try {
-    const { user_id, outcome } = req.body;
+    const { user_id, best_streak } = req.body;
 
-    if (!user_id || !outcome) {
-      return res.status(400).json({ ok: false, error: "user_id and outcome required" });
-    }
-
-    if (outcome !== "win" && outcome !== "lose") {
-      return res.status(400).json({ ok: false, error: "outcome must be win or lose" });
+    if (!user_id || typeof best_streak !== "number") {
+      return res.status(400).json({ ok: false, error: "user_id and best_streak required" });
     }
 
     const result = await pool.query(
-      "UPDATE users SET streak = CASE WHEN $2 = 'win' THEN streak + 1 ELSE 0 END WHERE id = $1 RETURNING streak",
-      [user_id, outcome]
+      "UPDATE users SET streak = GREATEST(streak, $2) WHERE id = $1 RETURNING streak",
+      [user_id, best_streak]
     );
 
     if (result.rows.length === 0) {
       return res.status(404).json({ ok: false, error: "User not found" });
     }
 
-    return res.json({ ok: true, streak: result.rows[0].streak });
+    return res.json({ ok: true, best_streak: result.rows[0].streak });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ ok: false, error: "Server error" });
