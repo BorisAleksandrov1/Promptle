@@ -13,6 +13,7 @@ app.use(express.json());
 const PORT = process.env.PORT || 3000;
 const PASSWORD_MIN_LENGTH = 8;
 const PASSWORD_MAX_LENGTH = 72;
+const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
 
 function normalizeEmail(email) {
   return email.trim().toLowerCase();
@@ -30,6 +31,49 @@ function isValidPassword(password) {
   const hasLetter = /[A-Za-z]/.test(password);
   const hasNumber = /\d/.test(password);
   return hasLetter && hasNumber;
+}
+
+async function requestHintFromOpenAI(word, type) {
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) {
+    throw new Error("API_KEY not configured");
+  }
+
+  const system = "You are a word game assistant. Never reveal the secret word. Respond with JSON only.";
+  const user =
+    type === "letters"
+      ? `Secret word: ${word}. Return JSON with keys helper_word and reveal_letters. helper_word must be a real word of the same length and not equal to the secret. reveal_letters must be a string of the same length using _ for hidden positions and uppercase letters for 2-3 revealed positions.`
+      : `Secret word: ${word}. Return JSON with key meaning_hint as a single sentence hint that describes the meaning without using the word, obvious rhymes, or spelling clues.`;
+
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: OPENAI_MODEL,
+      temperature: 0.7,
+      max_tokens: 120,
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: user },
+      ],
+    }),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`OpenAI error: ${errorText}`);
+  }
+
+  const data = await res.json();
+  const content = data.choices?.[0]?.message?.content?.trim();
+  if (!content) {
+    throw new Error("Empty hint response");
+  }
+
+  return content;
 }
 
 app.post("/api/register", async (req, res) => {
@@ -120,6 +164,41 @@ app.post("/api/words", async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ ok: false, error: "Server error" });
+  }
+});
+
+app.post("/api/hint", async (req, res) => {
+  try {
+    const { word, type } = req.body;
+
+    if (!word || !type) {
+      return res.status(400).json({ ok: false, error: "word and type required" });
+    }
+
+    if (type !== "letters" && type !== "meaning") {
+      return res.status(400).json({ ok: false, error: "type must be letters or meaning" });
+    }
+
+    const raw = await requestHintFromOpenAI(String(word).toUpperCase(), type);
+    const parsed = JSON.parse(raw);
+
+    if (type === "letters") {
+      const helperWord = String(parsed.helper_word || "").toUpperCase();
+      const revealLetters = String(parsed.reveal_letters || "").toUpperCase();
+      if (!helperWord || !revealLetters) {
+        return res.status(500).json({ ok: false, error: "Invalid hint response" });
+      }
+      return res.json({ ok: true, helper_word: helperWord, reveal_letters: revealLetters });
+    }
+
+    const meaningHint = String(parsed.meaning_hint || "").trim();
+    if (!meaningHint) {
+      return res.status(500).json({ ok: false, error: "Invalid hint response" });
+    }
+    return res.json({ ok: true, meaning_hint: meaningHint });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ ok: false, error: "Hint generation failed" });
   }
 });
 

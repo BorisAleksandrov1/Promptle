@@ -3,6 +3,9 @@ let authMode = "login";
 
 const API_BASE = "https://promptle-6gyj.onrender.com";
 
+// "http://localhost:5501" - local
+// "https://promptle-6gyj.onrender.com"; - render deployment
+
 const playBtn = document.getElementById("playBtn");
 const howToBtn = document.getElementById("howToBtn");
 const navLoginBtn = document.getElementById("navLoginBtn");

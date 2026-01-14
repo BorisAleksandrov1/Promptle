@@ -9,27 +9,51 @@
 </head>
 
 <body>
-  <div class="app" role="application" aria-label="Simple Wordle">
-    <header>
-      <h1>Wordle</h1>
-      <button class="btn" id="newGameBtn" type="button">New Game</button>
-    </header>
+  <div class="game-layout">
+    <div class="game-center">
+      <div class="app" role="application" aria-label="Simple Wordle">
+        <header>
+          <h1>Wordle</h1>
+          <button class="btn" id="newGameBtn" type="button">New Game</button>
+        </header>
 
-    <div class="status" id="status" aria-live="polite"></div>
-    <div class="streak" id="streak" aria-live="polite">Streak: 0</div>
+        <div class="status" id="status" aria-live="polite"></div>
+        <div class="streak" id="streak" aria-live="polite">Streak: 0</div>
 
-    <div class="grid" id="grid" aria-label="Guess grid"></div>
+        <div class="grid" id="grid" aria-label="Guess grid"></div>
 
-    <div class="keyboard" id="keyboard" aria-label="On-screen keyboard"></div>
+        <div class="keyboard" id="keyboard" aria-label="On-screen keyboard"></div>
 
-    <div class="footer">Type letters • Enter to submit • Backspace to delete</div>
-    <div class="result-screen" id="winScreen" aria-live="polite" aria-hidden="true">
-      <div class="result-card">
-        <div class="result-title" id="winMessage">Correct!</div>
-        <div class="result-sub">You guessed the word.</div>
-        <button class="btn btn-primary" id="continueBtn" type="button">Continue</button>
+        <div class="footer">Type letters ¢?÷ Enter to submit ¢?÷ Backspace to delete</div>
+        <div class="result-screen" id="winScreen" aria-live="polite" aria-hidden="true">
+          <div class="result-card">
+            <div class="result-title" id="winMessage">Correct!</div>
+            <div class="result-sub">You guessed the word.</div>
+            <button class="btn btn-primary" id="continueBtn" type="button">Continue</button>
+          </div>
+        </div>
       </div>
     </div>
+
+    <aside class="hint-panel" aria-live="polite">
+      <div class="hint-panel-header">
+        <div class="hint-panel-title">Hints</div>
+        <div class="hint-count" id="hintCount">3 hints left</div>
+      </div>
+
+      <div class="hint-code">
+        <div class="hint-code-head">
+          <span class="hint-lang">js</span>
+          <span class="hint-tag">hint output</span>
+        </div>
+        <pre class="hint-output" id="hintOutput"><code>// Ask for a hint to get started.</code></pre>
+      </div>
+
+      <div class="hint-actions">
+        <button class="btn hint-btn" id="hintLettersBtn" type="button">Word + letters</button>
+        <button class="btn hint-btn" id="hintMeaningBtn" type="button">Meaning hint</button>
+      </div>
+    </aside>
   </div>
 
   <!-- Your game logic -->

@@ -7,9 +7,14 @@ const streakEl = document.getElementById("streak");
 const winScreen = document.getElementById("winScreen");
 const winMessage = document.getElementById("winMessage");
 const continueBtn = document.getElementById("continueBtn");
+const hintOutput = document.getElementById("hintOutput");
+const hintCount = document.getElementById("hintCount");
+const hintLettersBtn = document.getElementById("hintLettersBtn");
+const hintMeaningBtn = document.getElementById("hintMeaningBtn");
 
 const API_BASE = "https://promptle-6gyj.onrender.com";
 const CURRENT_STREAK_KEY = "promptle_current_streak";
+const HINT_LIMIT = 3;
 
 // Global state
 const state = {
@@ -26,6 +31,10 @@ const state = {
   messageTimer: null,
   currentStreak: 0,
   bestStreak: 0
+};
+
+const hintState = {
+  remaining: HINT_LIMIT
 };
 
 // Load words from words.txt
@@ -74,6 +83,7 @@ function initGame() {
   );
 
   setStatus(`Guess the ${state.wordLen}-letter word.`);
+  resetHints();
 
   buildEmptyGrid();
   updateGrid();
@@ -199,6 +209,107 @@ function hideWinScreen() {
   if (!winScreen) return;
   winScreen.classList.remove("show");
   winScreen.setAttribute("aria-hidden", "true");
+}
+
+function setHintOutputText(text) {
+  if (!hintOutput) return;
+  hintOutput.textContent = text;
+}
+
+function updateHintUI() {
+  if (!hintCount) return;
+  const remaining = Math.max(0, hintState.remaining);
+  hintCount.textContent = `${remaining} hint${remaining === 1 ? "" : "s"} left`;
+  const disabled = remaining <= 0 || state.locked;
+  if (hintLettersBtn) hintLettersBtn.disabled = disabled;
+  if (hintMeaningBtn) hintMeaningBtn.disabled = disabled;
+}
+
+function resetHints() {
+  hintState.remaining = HINT_LIMIT;
+  setHintOutputText("// Ask for a hint to get started.");
+  updateHintUI();
+}
+
+function buildRevealPattern(word, revealCount) {
+  const picks = new Set();
+  while (picks.size < Math.min(revealCount, word.length)) {
+    picks.add(Math.floor(Math.random() * word.length));
+  }
+  return word
+    .split("")
+    .map((ch, idx) => (picks.has(idx) ? ch : "_"))
+    .join(" ");
+}
+
+function getHelperWord() {
+  const sameLength = state.wordList.filter((w) => w.length === state.wordLen && w !== state.secret);
+  const targetLetters = new Set(state.secret.split(""));
+  const candidates = sameLength.filter((w) => {
+    let shared = 0;
+    for (const ch of new Set(w.split(""))) {
+      if (targetLetters.has(ch)) shared += 1;
+    }
+    return shared >= 2;
+  });
+  const pool = candidates.length ? candidates : sameLength;
+  if (!pool.length) return state.secret;
+  return pickRandom(pool);
+}
+
+function buildLocalLetterHint() {
+  const helperWord = getHelperWord();
+  const revealCount = state.wordLen >= 6 ? 3 : 2;
+  const pattern = buildRevealPattern(state.secret, revealCount);
+  return `// word + letters hint\nconst helperWord = "${helperWord}";\nconst letters = "${pattern}";`;
+}
+
+function buildLocalMeaningHint() {
+  const topics = ["nature", "travel", "technology", "home", "music", "food", "sports", "art"];
+  const topic = topics[Math.floor(Math.random() * topics.length)];
+  return `// meaning hint\n// Think of a ${state.wordLen}-letter word related to ${topic}.`;
+}
+
+async function fetchHintFromServer(type) {
+  const res = await fetch(`${API_BASE}/api/hint`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ word: state.secret, type })
+  });
+
+  if (!res.ok) throw new Error("Hint request failed");
+  const data = await res.json();
+  if (!data.ok) throw new Error(data.error || "Hint request failed");
+
+  if (type === "letters") {
+    const helperWord = (data.helper_word || "").toUpperCase();
+    const revealLetters = (data.reveal_letters || "").toUpperCase();
+    if (!helperWord || !revealLetters) throw new Error("Hint data missing");
+    return `// word + letters hint\nconst helperWord = "${helperWord}";\nconst letters = "${revealLetters}";`;
+  }
+
+  const meaningHint = data.meaning_hint || "";
+  if (!meaningHint) throw new Error("Hint data missing");
+  return `// meaning hint\n// ${meaningHint}`;
+}
+
+async function requestHint(type) {
+  if (hintState.remaining <= 0 || state.locked) return;
+  setHintOutputText("// Generating hint...");
+  if (hintLettersBtn) hintLettersBtn.disabled = true;
+  if (hintMeaningBtn) hintMeaningBtn.disabled = true;
+
+  let hintText = "";
+
+  try {
+    hintText = await fetchHintFromServer(type);
+  } catch (err) {
+    hintText = type === "letters" ? buildLocalLetterHint() : buildLocalMeaningHint();
+  }
+
+  hintState.remaining = Math.max(0, hintState.remaining - 1);
+  setHintOutputText(hintText);
+  updateHintUI();
 }
 
 // Build the grid structure once (rows + tiles)
@@ -355,6 +466,7 @@ function submitGuess() {
     setStatus("Correct!", true);
     showWinScreen();
     handleWinStreak();
+    updateHintUI();
     return;
   }
 
@@ -362,6 +474,7 @@ function submitGuess() {
     state.locked = true;
     setStatus(`Game over. Word was ${state.secret}.`, true);
     handleLossStreak();
+    updateHintUI();
     return;
   }
 
@@ -430,6 +543,8 @@ document.addEventListener("keydown", (e) => {
 
 newBtn.addEventListener("click", resetGame);
 continueBtn.addEventListener("click", resetGame);
+if (hintLettersBtn) hintLettersBtn.addEventListener("click", () => requestHint("letters"));
+if (hintMeaningBtn) hintMeaningBtn.addEventListener("click", () => requestHint("meaning"));
 
 // Start first game after loading words
 window.addEventListener("load", async () => {
